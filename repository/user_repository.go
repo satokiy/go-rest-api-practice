@@ -11,8 +11,8 @@ import (
  */
 
 // これはユースケースの責務では？？
-//
-//	-> 境界線としては、ユースケース側にある.
+//	-> usecaseを見ればわかるが、usecaseではこのインターフェースに依存する実装をしている
+// インターフェースの実態（？）はRepository側に所属する
 type IUserRepository interface {
 	GetUserbyEmail(user *model.User, email string) error
 	CreateUser(user *model.User) error
@@ -23,13 +23,14 @@ type userRepository struct {
 }
 
 // CreateUser implements IUserRepository
-func (*userRepository) CreateUser(user *model.User) error {
+func (ur *userRepository) CreateUser(user *model.User) error {
 	// TODO: implement
+	ur.db.Create(user)
 	panic("unimplemented")
 }
 
 // GetUserbyEmail implements IUserRepository
-func (*userRepository) GetUserbyEmail(user *model.User, email string) error {
+func (ur *userRepository) GetUserbyEmail(user *model.User, email string) error {
 	// TODO: implement
 	panic("unimplemented")
 }

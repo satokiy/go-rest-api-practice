@@ -2,6 +2,7 @@ package controller
 
 // 本pjtではechoを使う
 import (
+	"go-rest-api/model"
 	"go-rest-api/usecase"
 
 	"github.com/labstack/echo/v4"
@@ -42,5 +43,7 @@ func (uc *userController) Logout(c echo.Context) error {
 // SignUp implements IUserController
 func (uc *userController) SignUp(c echo.Context) error {
 	// TODO: implement
+	uc.uu.SignUp(model.User{})
+
 	panic("unimplemented")
 }
