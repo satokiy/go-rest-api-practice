@@ -2,16 +2,28 @@ package db
 
 import (
 	"fmt"
-	"log"
-
+	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"log"
+	"os"
 )
 
 func NewDB() *gorm.DB {
+	if os.Getenv("GO_ENV") == "dev" {
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
 
-	// TODO: implement
-	url := "dummy"
+	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s",
+		os.Getenv("POSTGRES_USER"),
+		os.Getenv("POSTGRES_PW"),
+		os.Getenv("POSTGRES_HOST"),
+		os.Getenv("POSTGRES_PORT"),
+		os.Getenv("POSTGRES_DB"))
+
 	db, err := gorm.Open(postgres.Open(url), &gorm.Config{})
 	if err != nil {
 		log.Fatalln(err)
@@ -22,5 +34,8 @@ func NewDB() *gorm.DB {
 }
 
 func CloseDB(db *gorm.DB) {
-	// TODO: implement
+	sqlDB, _ := db.DB()
+	if err := sqlDB.Close(); err != nil {
+		log.Fatalln(err)
+	}
 }

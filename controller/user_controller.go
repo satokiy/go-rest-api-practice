@@ -4,6 +4,9 @@ package controller
 import (
 	"go-rest-api/model"
 	"go-rest-api/usecase"
+	"net/http"
+	"os"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
@@ -30,20 +33,62 @@ func NewUserController(uu usecase.IUserUsecase) IUserController {
 
 // Login implements IUserController
 func (uc *userController) Login(c echo.Context) error {
-	// TODO: implement
-	panic("unimplemented")
+	user := model.User{}
+	if err := c.Bind(&user); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+	tokenString, err := uc.uu.Login(user)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+
+	// cookieをセット
+	cookie := new(http.Cookie)
+	cookie.Name = "token"
+	cookie.Value = tokenString
+	cookie.Path = "/"
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+	cookie.Domain = os.Getenv("API_DOMAIN")
+	// 検証用にコメントアウト
+	// cookie.Secure = true
+	cookie.HttpOnly = true
+	cookie.SameSite = http.SameSiteNoneMode // cross site
+	c.SetCookie(cookie)
+
+	return c.NoContent(http.StatusOK)
 }
 
 // Logout implements IUserController
 func (uc *userController) Logout(c echo.Context) error {
-	// TODO: implement
-	panic("unimplemented")
+	// cookieを削除
+	cookie := new(http.Cookie)
+	cookie.Name = "token"
+	cookie.Value = ""
+	cookie.Path = "/"
+	cookie.Expires = time.Now()
+	cookie.Domain = os.Getenv("API_DOMAIN")
+	// 検証用にコメントアウト
+	// cookie.Secure = true
+	cookie.HttpOnly = true
+	cookie.SameSite = http.SameSiteNoneMode // cross site
+	c.SetCookie(cookie)
+	
+	return c.NoContent(http.StatusOK)
 }
 
 // SignUp implements IUserController
 func (uc *userController) SignUp(c echo.Context) error {
-	// TODO: implement
-	uc.uu.SignUp(model.User{})
+	// userを初期化
+	user := model.User{}
+	// echoのBindでuserに値を入れる
+	// https://echo.labstack.com/guide/request/#binding-data
+	if err := c.Bind(&user); err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+	res, err := uc.uu.SignUp(user)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
 
-	panic("unimplemented")
+	return c.JSON(http.StatusCreated, res)
 }
