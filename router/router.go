@@ -24,6 +24,10 @@ func NewRouter(uc controller.IUserController, tc controller.ITaskController) *ec
 	e.POST("/logout", uc.Logout)
     // task
 	e.POST("/tasks", tc.CreateTask)
+	e.GET("/tasks", tc.GetAllTasks)
+	e.GET("/tasks/:id", tc.GetTaskById)
+	e.PUT("/tasks/:id", tc.UpdateTask)
+	e.DELETE("/tasks/:id", tc.DeleteTask)
 
 	return e
 }
