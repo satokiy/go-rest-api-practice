@@ -78,17 +78,13 @@ func (uc *userController) Logout(c echo.Context) error {
 
 // SignUp implements IUserController
 func (uc *userController) SignUp(c echo.Context) error {
-	// userを初期化
 	user := model.User{}
-	// echoのBindでuserに値を入れる
-	// https://echo.labstack.com/guide/request/#binding-data
 	if err := c.Bind(&user); err != nil {
 		return c.JSON(http.StatusBadRequest, err.Error())
 	}
-	res, err := uc.uu.SignUp(user)
+	userRes, err := uc.uu.SignUp(user)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-
-	return c.JSON(http.StatusCreated, res)
+	return c.JSON(http.StatusCreated, userRes)
 }

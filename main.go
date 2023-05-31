@@ -18,8 +18,5 @@ func main() {
 	userController := controller.NewUserController(userUsecase)
 	taskController := controller.NewTaskController(taskUsecase)
 	e := router.NewRouter(userController, taskController)
-
-	if err := e.Start(":8080"); err != nil {
-		e.Logger.Fatal(err.Error())
-	}
+	e.Logger.Fatal(e.Start(":8080"))
 }
