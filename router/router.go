@@ -32,11 +32,10 @@ func NewRouter(uc controller.IUserController, tc controller.ITaskController) *ec
 		SigningKey:  []byte(os.Getenv("SECRET")),
 		TokenLookup: "cookie:token",
 	}))
-	e.GET("", tc.GetAllTasks)
-	e.GET("/:taskId", tc.GetTaskById)
-	e.POST("", tc.CreateTask)
-	e.PUT("/:taskId", tc.UpdateTask)
-	e.DELETE("/:taskId", tc.DeleteTask)
-
+	t.GET("", tc.GetAllTasks)
+	t.GET("/:taskId", tc.GetTaskById)
+	t.POST("", tc.CreateTask)
+	t.PUT("/:taskId", tc.UpdateTask)
+	t.DELETE("/:taskId", tc.DeleteTask)
 	return e
 }
