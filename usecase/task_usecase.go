@@ -3,10 +3,12 @@ package usecase
 import (
 	"go-rest-api/model"
 	"go-rest-api/repository"
+	"go-rest-api/validator"
 )
 
 type taskUsecase struct {
 	tr repository.ITaskRepository
+	tv validator.ITaskValidator
 }
 
 // usecase definition
@@ -21,14 +23,19 @@ type ITaskUsecase interface {
 
 // constractor
 // 値を渡すのか、参照を渡すのか？ -> 参照を渡したい。つまりコピーではなく実態を渡したい。
-func NewTaskUsecase(tr repository.ITaskRepository) ITaskUsecase {
+func NewTaskUsecase(tr repository.ITaskRepository, tv validator.ITaskValidator) ITaskUsecase {
 	return &taskUsecase{
-		tr: tr,
+		tr,
+		tv,
 	}
 }
 
 // implement
 func (tu *taskUsecase) CreateTask(task model.Task) (model.TaskResponse, error) {
+	// validationは値を渡す
+	if err := tu.tv.TaskValidate(task); err != nil {
+		return model.TaskResponse{}, err
+	}
 	// CreateTaskを実行するとtaskの値が変更されるので、参照を渡す
 	if err := tu.tr.CreateTask(&task); err != nil {
 		return model.TaskResponse{}, err
@@ -89,6 +96,9 @@ func (tu *taskUsecase) GetTaskById(userId uint, taskId uint) (model.TaskResponse
 
 // UpdateTask implements ITaskUsecase
 func (tu *taskUsecase) UpdateTask(task model.Task, userId uint, taskId uint) (model.TaskResponse, error) {
+	if err := tu.tv.TaskValidate(task); err != nil {
+		return model.TaskResponse{}, err
+	}
 	if err := tu.tr.UpdateTask(&task, userId, taskId); err != nil {
 		return model.TaskResponse{}, err
 	}

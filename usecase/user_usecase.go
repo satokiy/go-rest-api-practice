@@ -3,6 +3,7 @@ package usecase
 import (
 	"go-rest-api/model"
 	"go-rest-api/repository"
+	"go-rest-api/validator"
 	"os"
 	"time"
 
@@ -31,6 +32,7 @@ type userUsecase struct {
 	// これによってDIPを実現している
 	// Repositoryの実態がなくても、インターフェースさえ満たせばOKという状態
 	ur repository.IUserRepository
+	uv validator.IUserValidator
 }
 
 // dependency injectionによるコンストラクタ
@@ -38,14 +40,18 @@ type userUsecase struct {
 // これによって外部から注入された抽象的なオブジェクトとして扱うことができる
 // 引数はあくまでインターフェース。インターフェースにのみ依存させる
 // 戻り値をインターフェースとすることで、userUsecaseは実質インターフェースを強制される？
-func NewUserUsecase(ur repository.IUserRepository) IUserUsecase {
+func NewUserUsecase(ur repository.IUserRepository, uv validator.IUserValidator) IUserUsecase {
 	return &userUsecase{
-		ur: ur,
+		ur, uv,
 	}
 }
 
 // signupユースケースの具体
 func (uu *userUsecase) SignUp(user model.User) (model.UserResponse, error) {
+	// validate
+	if err := uu.uv.UserValidate(user); err != nil {
+		return model.UserResponse{}, err
+	}
 	// hash password
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
 	if err != nil {
